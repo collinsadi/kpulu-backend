@@ -77,7 +77,7 @@ app.post('/shorten', async (request, response)=>{
 
           if(existinglink){
 
-            return response.status(401).json({status: "error", details: "Url Already Use"})
+            return response.status(401).json({status: "error", details: "Url Already In Use"})
           }
         }
 
@@ -86,6 +86,10 @@ app.post('/shorten', async (request, response)=>{
             unique_id = await shortid.generate()
 
 
+        }
+        if(unique_id.split(' ').length > 0){
+
+            unique_id = unique_id.split(' ').join('-')
         }
 
        const shorturl = await ShortUrl.create({long_Url, unique_id})
