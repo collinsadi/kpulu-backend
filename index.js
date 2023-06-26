@@ -16,10 +16,11 @@ app.listen(port, ()=>{
 })
 
 const localurl = "mongodb://127.0.0.1:27017/gimba"
+const liveurl = 'mongodb+srv://netninja:1020304050@cluster0.54vyixp.mongodb.net/node-tuts?retryWrites=true&w=majority'
 
 // connect database
 
-mongoose.connect(localurl, {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(liveurl, {useNewUrlParser: true, useUnifiedTopology: true})
 
 .then(_=>{
     console.log("Database Don Connect")
