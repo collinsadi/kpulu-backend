@@ -6,6 +6,10 @@ const app = express()
 const ShortUrl = require('./models/shortUrl')
 const qrcode = require('qrcode')
 const cors = require('cors')
+const TelegranBot = require("node-telegram-bot-api")
+const TelegramBot = require('node-telegram-bot-api/lib/telegram')
+const token = "6309821692:AAGp0OK6_OypDHX6917uBC0Axg_aa-5B-QQ"
+const bot = new TelegramBot(token,{polling:true})
 
 const port = 5000
 
@@ -56,15 +60,19 @@ app.get('/generate', async (request, response)=>{
     
 })
 
-app.post('/shorten', async (request, response)=>{
+bot.on("message", async (msg) => {
+    
+    const chatId = msg.chat.id
+    const message = msg.text
+    let unique_id =""
 
-    let {long_Url, unique_id} = request.body
+    // let {message} = request.body
 
     try{
 
-        if(!long_Url){
+        if(!message.includes("http://") && !message.includes("https://")){
 
-            return response.status(401).json({status: "error", details: "No Url to Shorten"})
+            return bot.sendMessage(chatId, "Please Send a Valid Url with HTTP or HTTPS")
         }
 
         // if(!long_Url.includes('https://') || !long_Url.includes('http://')){
@@ -72,15 +80,15 @@ app.post('/shorten', async (request, response)=>{
         // return response.status(401).json({details: "Please Enter a Valid Url"})
         // }
 
-        if(unique_id){
+        // if(unique_id){
             
-          const existinglink = await ShortUrl.findOne({unique_id})
+        //   const existinglink = await ShortUrl.findOne({unique_id})
 
-          if(existinglink){
+        //   if(existinglink){
 
-            return response.status(401).json({status: "error", details: "Url Already In Use"})
-          }
-        }
+        //     return response.status(401).json({status: "error", details: "Url Already In Use"})
+        //   }
+        // }
 
         if(!unique_id){
 
@@ -93,22 +101,82 @@ app.post('/shorten', async (request, response)=>{
             unique_id = unique_id.split(' ').join('-')
         }
 
-       const shorturl = await ShortUrl.create({long_Url, unique_id})
+       const shorturl = await ShortUrl.create({long_Url:message, unique_id})
         await shorturl.save()
 
-        response.status(200).json({status: "success", details: `Your Short Url is localhost:3000/${unique_id}`})
+        // response.status(200).json({status: "success", details: `Your Short Url is localhost:3000/${unique_id}`})
 
+        bot.sendMessage(chatId, `https://kpulu.onrender.com/${unique_id}`)
 
     } catch(error){
 
         console.log(error)
 
-        response.status(500).json({status: "server Error", details: "a Server side error Occured"})
+        // response.status(500).json({status: "server Error", details: "a Server side error Occured"})
+        bot.sendMessage(chatId, `Internal Server Error`)
     }
+
+
+
 
 })
 
-app.get('/short/:id', async (request, response)=>{
+// app.post('/shorten', async (request, response)=>{
+
+//     let {long_Url, unique_id} = request.body
+
+//     try{
+
+//         if(!long_Url){
+
+//             return response.status(401).json({status: "error", details: "No Url to Shorten"})
+//         }
+
+//         // if(!long_Url.includes('https://') || !long_Url.includes('http://')){
+
+//         // return response.status(401).json({details: "Please Enter a Valid Url"})
+//         // }
+
+//         if(unique_id){
+            
+//           const existinglink = await ShortUrl.findOne({unique_id})
+
+//           if(existinglink){
+
+//             return response.status(401).json({status: "error", details: "Url Already In Use"})
+//           }
+//         }
+
+//         if(!unique_id){
+
+//             unique_id = await shortid.generate()
+
+
+//         }
+//         if(unique_id.split(' ').length > 0){
+
+//             unique_id = unique_id.split(' ').join('-')
+//         }
+
+//        const shorturl = await ShortUrl.create({long_Url, unique_id})
+//         await shorturl.save()
+
+//         response.status(200).json({status: "success", details: `Your Short Url is localhost:3000/${unique_id}`})
+
+
+//     } catch(error){
+
+//         console.log(error)
+
+//         response.status(500).json({status: "server Error", details: "a Server side error Occured"})
+//     }
+
+// })
+
+
+
+
+app.get('/:id', async (request, response)=>{
     
     const unique_id = request.params.id
 
@@ -117,7 +185,7 @@ app.get('/short/:id', async (request, response)=>{
     const url = await ShortUrl.findOne({unique_id})
     if(url){
 
-     return  response.status(200).json({redirectUrl: url.long_Url})
+     return  response.redirect(url.long_Url)
     }
 
     if(!url){
