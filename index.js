@@ -31,7 +31,7 @@ mongoose.connect(liveurl, {useNewUrlParser: true, useUnifiedTopology: true})
 })
 
 .catch(error=>{
-    console.log("Databse no dey gree Connect", error)
+    console.log("Databse no dey  Connect", error)
 })
 
 // middle wares
