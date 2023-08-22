@@ -68,7 +68,7 @@ bot.on("message", async (msg) => {
 
     // let {message} = request.body
 
-    const response = await fetch("/shorten",{method:"POST",headers:{"Content-Type":"application/json"}})
+    // const response = await fetch("/shorten",{method:"POST",headers:{"Content-Type":"application/json"}})
 
     try{
 
