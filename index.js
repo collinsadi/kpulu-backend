@@ -68,6 +68,8 @@ bot.on("message", async (msg) => {
 
     // let {message} = request.body
 
+    const response = await fetch("/shorten",{method:"POST",headers:{"Content-Type":"application/json"}})
+
     try{
 
         if(!message.includes("http://") && !message.includes("https://")){
@@ -116,7 +118,7 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, `Internal Server Error`)
     }
 
-
+   
 
 
 })
