@@ -106,7 +106,7 @@ bot.on("message", async (msg) => {
 
         // response.status(200).json({status: "success", details: `Your Short Url is localhost:3000/${unique_id}`})
 
-        bot.sendMessage(chatId, `https://kpuluurl.onrender.com/${unique_id}`)
+        bot.sendMessage(chatId, `https://kpulu1.vercel.app/${unique_id}`)
 
     } catch(error){
 
