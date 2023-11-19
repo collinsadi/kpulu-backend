@@ -4,24 +4,21 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const app = express()
 const ShortUrl = require('./models/shortUrl')
-const qrcode = require('qrcode')
-const cors = require('cors')
-const TelegranBot = require("node-telegram-bot-api")
 const TelegramBot = require('node-telegram-bot-api/lib/telegram')
-const token = "6309821692:AAGp0OK6_OypDHX6917uBC0Axg_aa-5B-QQ"
-const bot = new TelegramBot(token,{polling:true})
-
+require("dotenv").config()
+const token = process.env.TOKEN
+const serverUrl = process.env.SERVER_URL
+const bot = new TelegramBot(token, { polling: true })
+const cron = require("node-cron");
+const axios = require("axios");
 const port = 5000
 
 app.listen(port, ()=>{
-
     console.log("server Started")
-
 })
 
-const localurl = "mongodb://127.0.0.1:27017/gimba"
-const liveurl = 'mongodb+srv://netninja:1020304050@cluster0.54vyixp.mongodb.net/node-tuts?retryWrites=true&w=majority'
-
+const localurl = "mongodb://127.0.0.1:27017"
+const liveurl = process.env.LIVE_URL
 // connect database
 
 mongoose.connect(liveurl, {useNewUrlParser: true, useUnifiedTopology: true})
@@ -38,16 +35,13 @@ mongoose.connect(liveurl, {useNewUrlParser: true, useUnifiedTopology: true})
 app.use(morgan('dev'))
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
-app.use(cors({
-    origin: 'http://localhost:3000'
-}))
 
 
 
 
 app.get("/api", (request, response)=>{
 
-    response.status(200).json({status: "Sucess", message: "Welcome to The Url Shortener Website API"})
+response.status(200).json({status: "Sucess", message: "Welcome to The Url Shortener Website API"})
 
 })
 
@@ -66,10 +60,6 @@ bot.on("message", async (msg) => {
     const message = msg.text
     let unique_id =""
 
-    // let {message} = request.body
-
-    // const response = await fetch("/shorten",{method:"POST",headers:{"Content-Type":"application/json"}})
-
     try{
 
         if(!message.includes("http://") && !message.includes("https://")){
@@ -77,20 +67,6 @@ bot.on("message", async (msg) => {
             return bot.sendMessage(chatId, "Please Send a Valid Url with HTTP or HTTPS")
         }
 
-        // if(!long_Url.includes('https://') || !long_Url.includes('http://')){
-
-        // return response.status(401).json({details: "Please Enter a Valid Url"})
-        // }
-
-        // if(unique_id){
-            
-        //   const existinglink = await ShortUrl.findOne({unique_id})
-
-        //   if(existinglink){
-
-        //     return response.status(401).json({status: "error", details: "Url Already In Use"})
-        //   }
-        // }
 
         if(!unique_id){
 
@@ -106,15 +82,12 @@ bot.on("message", async (msg) => {
        const shorturl = await ShortUrl.create({long_Url:message, unique_id})
         await shorturl.save()
 
-        // response.status(200).json({status: "success", details: `Your Short Url is localhost:3000/${unique_id}`})
-
         bot.sendMessage(chatId, `https://kpulu.vercel.app/${unique_id}`)
 
     } catch(error){
 
         console.log(error)
 
-        // response.status(500).json({status: "server Error", details: "a Server side error Occured"})
         bot.sendMessage(chatId, `Internal Server Error`)
     }
 
@@ -175,6 +148,15 @@ bot.on("message", async (msg) => {
 
 // })
 
+// cron to keep server online (runs every 5 minutes)
+cron.schedule("*/10 * * * *", () => {
+  try {
+    console.log("cron running for server");
+    axios.get(serverUrl);
+  } catch (e) {
+    console.log(e.message);
+  }
+});
 
 
 
